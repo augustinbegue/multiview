@@ -19,6 +19,26 @@ Live at <https://multiview.keepalive.studio>.
 Switching never remounts a player: all sources stay mounted and only move in the
 CSS grid, so streams keep playing without reloading. Only the chat pane reloads.
 
+## ZEVENT mode
+
+`/zevent` is a self-configuring variant: it pulls <https://zevent.fr/api/>, keeps the
+streamers that are `online`, sorts them by viewer count and puts the top 9 on the
+grid. There is no setup screen and `?c=` is ignored.
+
+- **refresh channels** in the top bar re-fetches the list. If the ordering is
+  unchanged the button flashes "up to date"; otherwise the stage is rebuilt.
+  A "last updated HH:MM:SS" stamp sits next to the button.
+- Tile labels show the channel name plus its current viewer count.
+- If zevent.fr can't be reached the top bar shows "zevent.fr unreachable" and the
+  current stage is kept.
+- State (program slot, mute) persists under `multiview.zevent.v1`, separate from the
+  manual configuration, and `c=` is never written to the URL in this mode.
+- "manual" in the top bar goes back to `/`; the setup screen links to `/zevent`.
+
+The API sends no CORS header, so it is proxied same-origin at `/api/zevent` — by
+`vite.config.ts` `server.proxy` in dev and by nginx in the image (with a 20 s
+`proxy_cache` so refresh-spam doesn't hammer zevent.fr).
+
 ## URL parameters
 
 The current setup is written to the URL, so a link is shareable and bookmarkable.

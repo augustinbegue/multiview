@@ -4,6 +4,9 @@ import "./style.css";
 interface TwitchPlayer {
   setMuted(muted: boolean): void;
   setQuality(quality: string): void;
+  play(): void;
+  pause(): void;
+  addEventListener(event: string, cb: () => void): void;
 }
 interface TwitchPlayerOptions {
   channel: string;
@@ -15,7 +18,12 @@ interface TwitchPlayerOptions {
   controls?: boolean;
 }
 type TwitchGlobal = {
-  Player: { new (id: string, options: TwitchPlayerOptions): TwitchPlayer };
+  Player: {
+    new (id: string, options: TwitchPlayerOptions): TwitchPlayer;
+    READY: string;
+    PLAYBACK_BLOCKED: string;
+    PLAYING: string;
+  };
 };
 declare global {
   interface Window { Twitch?: TwitchGlobal }
@@ -24,7 +32,9 @@ declare global {
 /* ---------- state ---------- */
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 9;
-const STORE_KEY = "multiview.state.v1";
+const ZEVENT_MODE = /^\/zevent\/?$/.test(location.pathname);
+const ZEVENT_SLOTS = 9;
+const STORE_KEY = ZEVENT_MODE ? "multiview.zevent.v1" : "multiview.state.v1";
 const HOST = location.hostname || "localhost";
 
 type State = { channels: string[]; main: number; mutedAll: boolean };
@@ -59,6 +69,7 @@ function readStored(): State | null {
 }
 
 function readUrl(): State | null {
+  if (ZEVENT_MODE) return null;
   const params = new URLSearchParams(location.search);
   const c = params.get("c");
   if (!c) return null;
@@ -77,7 +88,7 @@ let state: State = { channels: [], main: 0, mutedAll: false };
 function persist(): void {
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
   const params = new URLSearchParams();
-  params.set("c", state.channels.join(","));
+  if (!ZEVENT_MODE) params.set("c", state.channels.join(","));
   params.set("m", String(state.main + 1));
   if (state.mutedAll) params.set("mute", "1");
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
@@ -89,6 +100,45 @@ const muteAllBtn = el<HTMLButtonElement>("#mute-all");
 const players = new Map<string, TwitchPlayer>();
 const tiles: HTMLElement[] = [];
 let chatBox: HTMLElement | null = null;
+
+/* ---------- autoplay-blocked overlay ---------- */
+const startOverlay = el<HTMLElement>("#start");
+const blocked = new Set<TwitchPlayer>();
+let gestureSeen = false;
+
+function markGesture(): void {
+  gestureSeen = true;
+}
+document.addEventListener("pointerdown", markGesture);
+document.addEventListener("keydown", markGesture);
+
+function showStartOverlay(): void {
+  if (!setup.hidden) return;
+  startOverlay.hidden = false;
+}
+
+function hideStartOverlay(): void {
+  startOverlay.hidden = true;
+}
+
+function playAll(): void {
+  blocked.forEach((p) => p.play());
+  players.forEach((p) => p.play());
+  applyAudio();
+  hideStartOverlay();
+  blocked.clear();
+}
+
+startOverlay.addEventListener("click", playAll);
+document.addEventListener("pointerdown", () => {
+  if (!startOverlay.hidden) playAll();
+});
+document.addEventListener("keydown", (e) => {
+  if (!startOverlay.hidden) {
+    e.preventDefault();
+    playAll();
+  }
+});
 
 function buildStage(): void {
   stage.replaceChildren();
@@ -112,8 +162,11 @@ function buildStage(): void {
     label.innerHTML =
       `<span class="label-num">${i + 1}</span>` +
       `<span class="label-name"></span>` +
+      `<span class="label-count"></span>` +
       `<span class="label-tag"></span>`;
     label.querySelector<HTMLElement>(".label-name")!.textContent = channel;
+    const count = label.querySelector<HTMLElement>(".label-count");
+    if (count) count.textContent = ZEVENT_MODE ? (zeventCounts.get(channel) ?? "") : "";
 
     tile.append(screen, label);
     stage.append(tile);
@@ -157,6 +210,24 @@ function mountPlayers(): void {
       height: "100%",
     });
     players.set(channel + i, player);
+
+    player.addEventListener(Twitch.Player.READY, () => {
+      player.play();
+    });
+    let retried = false;
+    player.addEventListener(Twitch.Player.PLAYBACK_BLOCKED, () => {
+      blocked.add(player);
+      if (gestureSeen && !retried) {
+        retried = true;
+        window.setTimeout(() => player.play(), 500);
+      } else {
+        showStartOverlay();
+      }
+    });
+    player.addEventListener(Twitch.Player.PLAYING, () => {
+      blocked.delete(player);
+      if (blocked.size === 0) hideStartOverlay();
+    });
   });
   applyAudio();
 }
@@ -214,6 +285,115 @@ function selectSlot(index: number): void {
   applyLayout();
   applyAudio();
   persist();
+}
+
+/* ---------- zevent mode ---------- */
+interface ZeventEntry {
+  twitch: unknown;
+  online: unknown;
+  viewersAmount?: { number?: unknown; formatted?: unknown };
+}
+
+const zeventCounts = new Map<string, string>();
+const zeventBadge = el<HTMLElement>("#zevent-badge");
+const zeventRefreshBtn = el<HTMLButtonElement>("#zevent-refresh");
+const zeventUpdated = el<HTMLElement>("#zevent-updated");
+const zeventError = el<HTMLElement>("#zevent-error");
+const editBtn = el<HTMLButtonElement>("#edit");
+const modeLink = el<HTMLAnchorElement>("#mode-link");
+
+type ZeventFeed = { channels: string[]; counts: Map<string, string> };
+
+async function fetchZevent(): Promise<ZeventFeed> {
+  const res = await fetch("/api/zevent", { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error(`zevent api ${res.status}`);
+  const body: unknown = await res.json();
+  const live = (body as { live?: unknown } | null)?.live;
+  if (!Array.isArray(live)) throw new Error("zevent api: unexpected payload");
+
+  const rows = (live as ZeventEntry[])
+    .filter((e) => e && e.online === true && typeof e.twitch === "string")
+    .map((e) => ({
+      login: clean(e.twitch as string),
+      viewers: typeof e.viewersAmount?.number === "number" ? e.viewersAmount.number : 0,
+      formatted:
+        typeof e.viewersAmount?.formatted === "string"
+          ? e.viewersAmount.formatted
+          : String(typeof e.viewersAmount?.number === "number" ? e.viewersAmount.number : ""),
+    }))
+    .filter((r) => r.login);
+
+  rows.sort((a, b) => b.viewers - a.viewers);
+
+  const counts = new Map<string, string>();
+  const channels: string[] = [];
+  for (const row of rows) {
+    if (channels.includes(row.login)) continue;
+    channels.push(row.login);
+    counts.set(row.login, row.formatted);
+    if (channels.length >= ZEVENT_SLOTS) break;
+  }
+  if (channels.length === 0) throw new Error("zevent api: nobody live");
+  return { channels, counts };
+}
+
+function setZeventError(message: string | null): void {
+  zeventError.textContent = message ?? "";
+  zeventError.hidden = message === null;
+}
+
+function stampZeventUpdate(): void {
+  zeventUpdated.hidden = false;
+  zeventUpdated.textContent = `last updated ${new Date().toTimeString().slice(0, 8)}`;
+}
+
+let flashTimer = 0;
+function flashRefreshLabel(text: string): void {
+  window.clearTimeout(flashTimer);
+  zeventRefreshBtn.textContent = text;
+  flashTimer = window.setTimeout(() => {
+    zeventRefreshBtn.textContent = "refresh channels";
+  }, 1500);
+}
+
+async function loadZevent(isRefresh: boolean): Promise<void> {
+  zeventRefreshBtn.disabled = true;
+  try {
+    const feed = await fetchZevent();
+    setZeventError(null);
+    const unchanged = feed.channels.join(",") === state.channels.join(",");
+    zeventCounts.clear();
+    feed.counts.forEach((v, k) => zeventCounts.set(k, v));
+    stampZeventUpdate();
+
+    if (unchanged && isRefresh) {
+      flashRefreshLabel("up to date");
+      return;
+    }
+
+    // keep the persisted program slot only if that channel is still at the same index
+    const previous = state.channels[state.main];
+    const main = previous && feed.channels[state.main] === previous ? state.main : 0;
+    state = { channels: feed.channels, main, mutedAll: state.mutedAll };
+    persist();
+    buildStage();
+    tickClock();
+  } catch (err) {
+    console.error(err);
+    setZeventError("zevent.fr unreachable");
+    if (isRefresh) flashRefreshLabel("failed");
+  } finally {
+    zeventRefreshBtn.disabled = false;
+  }
+}
+
+if (ZEVENT_MODE) {
+  zeventBadge.hidden = false;
+  zeventRefreshBtn.hidden = false;
+  editBtn.hidden = true;
+  modeLink.href = "/";
+  modeLink.textContent = "manual";
+  zeventRefreshBtn.addEventListener("click", () => void loadZevent(true));
 }
 
 /* ---------- setup screen ---------- */
@@ -284,6 +464,7 @@ cancelBtn.addEventListener("click", closeSetup);
 
 setupForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  gestureSeen = true;
   const channels = slotInputs().map((i) => clean(i.value)).filter(Boolean);
   if (channels.length < MIN_SLOTS) {
     setupError.textContent = `Enter at least ${MIN_SLOTS} channel names.`;
@@ -310,6 +491,11 @@ window.addEventListener("keydown", (e) => {
 });
 
 /* ---------- boot ---------- */
+if (ZEVENT_MODE) {
+  const stored = readStored();
+  if (stored) state = { channels: [], main: Math.max(stored.main, 0), mutedAll: stored.mutedAll };
+  void loadZevent(false);
+} else {
 const initial = readUrl() ?? readStored();
 if (initial && initial.channels.length >= 1) {
   state = {
@@ -322,4 +508,5 @@ if (initial && initial.channels.length >= 1) {
   tickClock();
 } else {
   openSetup();
+}
 }
