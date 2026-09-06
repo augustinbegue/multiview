@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr" data-page="zevent">
+  <head>
+    <!--#include head-->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://multiview.keepalive.studio/fr/zevent#webpage",
+          "url": "https://multiview.keepalive.studio/fr/zevent",
+          "name": "ZEvent multiview – regarder les 9 streams ZEvent 2026 les plus regardés en même temps",
+          "description": "Multistream ZEvent gratuit : les 9 streams ZEvent 2026 les plus regardés sur un seul écran, sélectionnés automatiquement depuis la liste live officielle de zevent.fr.",
+          "inLanguage": "fr",
+          "isPartOf": { "@id": "https://multiview.keepalive.studio/#website" },
+          "about": { "@id": "https://multiview.keepalive.studio/#zevent2026" },
+          "mainEntity": { "@id": "https://multiview.keepalive.studio/#app" },
+          "dateModified": "2026-09-06",
+          "breadcrumb": { "@id": "https://multiview.keepalive.studio/fr/zevent#breadcrumb" }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://multiview.keepalive.studio/fr/zevent#breadcrumb",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Multiview", "item": "https://multiview.keepalive.studio/fr/" },
+            { "@type": "ListItem", "position": 2, "name": "ZEvent multiview", "item": "https://multiview.keepalive.studio/fr/zevent" }
+          ]
+        },
+        {
+          "@type": "Event",
+          "@id": "https://multiview.keepalive.studio/#zevent2026",
+          "name": "ZEvent 2026",
+          "description": "Le ZEvent est un marathon caritatif de streaming sur Twitch créé par ZeratoR et Dach. L'édition 2026, annoncée comme la dixième et dernière, se déroule du 4 au 7 septembre 2026 et reverse les dons aux associations soutenues au fil des dix ans de l'événement.",
+          "startDate": "2026-09-04T18:00:00+02:00",
+          "endDate": "2026-09-07T02:00:00+02:00",
+          "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+          "eventStatus": "https://schema.org/EventScheduled",
+          "location": [
+            { "@type": "VirtualLocation", "url": "https://www.twitch.tv/zevent" },
+            { "@type": "Place", "name": "Montpellier", "address": { "@type": "PostalAddress", "addressLocality": "Montpellier", "addressCountry": "FR" } }
+          ],
+          "organizer": { "@type": "Organization", "name": "ZEvent", "url": "https://zevent.fr" },
+          "url": "https://zevent.fr",
+          "isAccessibleForFree": true,
+          "inLanguage": "fr"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Comment regarder plusieurs streams du ZEvent en même temps ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Ouvrez multiview.keepalive.studio/fr/zevent. La page récupère la liste live officielle de zevent.fr, garde les streamers en ligne, les trie par nombre de viewers et affiche les 9 premiers en même temps : un programme avec son chat et huit vignettes live. Appuyez sur 1 à 9 pour changer de programme." }
+            },
+            {
+              "@type": "Question",
+              "name": "Quels streamers du ZEvent sont affichés ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Les 9 chaînes participantes avec le plus de viewers au moment où vous ouvrez la page, selon zevent.fr. Cliquez sur actualiser les chaînes pour relire la liste ; votre programme est conservé si ce streamer est toujours dans le top 9. Pour une sélection personnalisée, passez en mode manuel et tapez les chaînes ZEvent de votre choix." }
+            },
+            {
+              "@type": "Question",
+              "name": "Mes vues comptent-elles pour les streamers et pour le ZEvent ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Oui. Multiview utilise le lecteur Twitch officiel intégré pour chaque chaîne : vues, pubs et chat se comportent comme sur twitch.tv. Les dons se font uniquement sur zevent.fr ; ce site ne gère jamais d'argent." }
+            },
+            {
+              "@type": "Question",
+              "name": "Quand a lieu le ZEvent 2026 ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Le ZEvent 2026 se déroule du vendredi 4 septembre 2026 (18 h, heure de Paris) au lundi 7 septembre 2026, avec un concert d'ouverture à Montpellier le 3 septembre. Il est présenté comme la dixième et dernière édition. Consultez zevent.fr pour le planning officiel et le total de la cagnotte." }
+            },
+            {
+              "@type": "Question",
+              "name": "Est-ce le multiview officiel du ZEvent ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Non. Multiview est un outil gratuit fait par un fan, sans lien avec le ZEvent, ZeratoR ou Twitch. Le site officiel est zevent.fr et la chaîne officielle est twitch.tv/zevent." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <!--#include app-->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

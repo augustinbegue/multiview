@@ -1,0 +1,20 @@
+# Multiview
+
+> Multiview (multiview.keepalive.studio) is a free, open-source web app to watch up to 9 Twitch streams at once in a broadcast control-room layout: one large program feed with its Twitch chat, every other channel live in a thumbnail strip, instant switching with keys 1-9 and no player reload. No account, no download. Available in English and French. Made by Augustin Bégué; not affiliated with Twitch or ZEvent.
+
+Key facts:
+- Watch 2 to 9 Twitch channels simultaneously; only the program feed plays audio.
+- Shareable URLs: `https://multiview.keepalive.studio/?c=channel1,channel2` or `https://multiview.keepalive.studio/channel1/channel2`. `&m=2` picks the program slot, `&mute=1` starts muted.
+- ZEvent mode (`/zevent`, French `/fr/zevent`) reads the official live list from zevent.fr and auto-selects the 9 most-watched ZEvent 2026 charity streams, with viewer counts and a refresh button. Unofficial fan tool; donations only on zevent.fr.
+- Uses the official Twitch embedded player, so views, ads and chat count as on twitch.tv.
+- Source code: https://github.com/augustinbegue/multiview
+
+## Pages
+- [Multiview (English)](https://multiview.keepalive.studio/): main tool, how-to and FAQ.
+- [Multiview (Français)](https://multiview.keepalive.studio/fr/): regarder plusieurs streams Twitch en même temps, mode d'emploi et FAQ.
+- [ZEvent multiview (English)](https://multiview.keepalive.studio/zevent): top 9 ZEvent 2026 streams at once, event facts, FAQ.
+- [ZEvent multiview (Français)](https://multiview.keepalive.studio/fr/zevent): les 9 streams ZEvent 2026 les plus regardés, infos sur l'événement, FAQ.
+
+## Optional
+- [Sitemap](https://multiview.keepalive.studio/sitemap.xml)
+- [GitHub repository](https://github.com/augustinbegue/multiview)

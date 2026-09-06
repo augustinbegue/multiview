@@ -1,0 +1,61 @@
+    <article id="about" class="about" lang="fr">
+      <header class="about-head">
+        <h1>Regarder plusieurs streams Twitch en même temps, dans une régie façon plateau TV</h1>
+        <p class="about-lead"><strong>Multiview</strong> est un multitwitch gratuit et open source qui joue jusqu'à 9 chaînes Twitch en même temps : un grand <em>programme</em> avec son chat Twitch, et toutes les autres chaînes en direct dans un bandeau de vignettes avec étiquettes façon tally. Appuyez sur <kbd>1</kbd>–<kbd>9</kbd> ou cliquez une vignette pour changer de programme. Sans compte, sans téléchargement, sans extension. <a href="/" hreflang="en" lang="en">English version</a>.</p>
+        <p class="about-meta">Mis à jour le 6 septembre 2026 · <a href="https://github.com/augustinbegue/multiview">Code source sur GitHub</a> · <a href="/fr/zevent">Multiview ZEvent</a></p>
+      </header>
+
+      <section>
+        <h2>Comment regarder plusieurs streams Twitch en même temps</h2>
+        <ol>
+          <li>Tapez un nom de chaîne Twitch par slot (2 à 9 chaînes). Le slot 1 démarre en programme.</li>
+          <li>Cliquez sur <strong>Lancer le multiview</strong>. Toutes les chaînes démarrent en même temps ; seul le programme a le son.</li>
+          <li>Appuyez sur <kbd>1</kbd>–<kbd>9</kbd> ou cliquez l'étiquette d'une vignette pour la passer en programme. Les lecteurs ne sont jamais rechargés, rien ne rebufferise.</li>
+          <li>Partagez l'URL. Votre sélection y est écrite, par exemple <code>multiview.keepalive.studio/fr/?c=zerator,gotaga,squeezie</code> ou simplement <code>multiview.keepalive.studio/fr/zerator/gotaga/squeezie</code>.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Pourquoi une régie plutôt qu'une grille</h2>
+        <p>Les sites multitwitch classiques affichent chaque stream dans une grille de cases égales : tout est petit et on change d'onglet pour lire le chat. Multiview reproduit le multiviewer d'un vrai mélangeur de diffusion (une régie façon ATEM) : le stream qui vous intéresse est en grand, son chat est à côté, et les autres restent visibles en vignettes live pour ne rien rater. C'est la disposition qu'on utilise pour les tournois, les serveurs GTA RP, les marathons de speedrun et les événements caritatifs comme le <a href="/fr/zevent">ZEvent</a>, quand on veut suivre un point de vue sans perdre les autres.</p>
+        <ul class="about-grid">
+          <li><strong>Jusqu'à 9 streams</strong> en direct, 2 minimum.</li>
+          <li><strong>Programme + chat</strong> : le chat de la chaîne sélectionnée est intégré à côté.</li>
+          <li><strong>Bascule instantanée</strong> avec les touches numériques ou un clic, sans rechargement.</li>
+          <li><strong>Liens partageables</strong> : liste <code>?c=</code> ou chemins <code>/chaine1/chaine2</code>.</li>
+          <li><strong>Le son suit le programme</strong> ; un bouton coupe tout.</li>
+          <li><strong>Lecteur Twitch officiel</strong> : vues, pubs, drops et chat fonctionnent comme sur twitch.tv.</li>
+          <li><strong>Mode ZEvent</strong> : sélectionne automatiquement les 9 chaînes ZEvent les plus regardées.</li>
+          <li><strong>Français et anglais</strong>, mise en page mobile incluse.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Paramètres d'URL</h2>
+        <table>
+          <thead><tr><th>Paramètre</th><th>Signification</th><th>Exemple</th></tr></thead>
+          <tbody>
+            <tr><td><code>c</code></td><td>Chaînes séparées par des virgules, dans l'ordre des slots</td><td><code>?c=zerator,gotaga,squeezie</code></td></tr>
+            <tr><td><code>m</code></td><td>Slot en programme (à partir de 1, défaut 1)</td><td><code>&amp;m=2</code></td></tr>
+            <tr><td><code>mute</code></td><td><code>1</code> pour démarrer avec tout le son coupé</td><td><code>&amp;mute=1</code></td></tr>
+            <tr><td>chemin</td><td>Identique à <code>c</code>, façon multitwitch</td><td><code>/fr/zerator/gotaga</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="about-faq">
+        <h2>Questions fréquentes</h2>
+        <details><summary>Comment regarder plusieurs streams Twitch en même temps ?</summary><p>Ouvrez cette page, tapez un nom de chaîne Twitch par slot (2 à 9 chaînes) et cliquez sur Lancer le multiview. Toutes les chaînes jouent en direct en même temps : le programme est en grand avec son chat, les autres sont en vignettes. Appuyez sur 1 à 9 ou cliquez une vignette pour choisir le stream en programme, qui est le seul avec le son.</p></details>
+        <details><summary>Combien de streams Twitch peut-on regarder en même temps ?</summary><p>Jusqu'à 9 chaînes Twitch simultanément. Chacune continue de jouer dans son slot ; seul le programme a le son, les autres sont coupées jusqu'à ce que vous les basculiez.</p></details>
+        <details><summary>Peut-on partager son multiview avec un lien ?</summary><p>Oui. Les chaînes sont écrites dans l'URL sous la forme <code>?c=chaine1,chaine2,chaine3</code> (ajoutez <code>&amp;m=2</code> pour choisir le slot programme et <code>&amp;mute=1</code> pour démarrer sans son). Les liens de type <code>multiview.keepalive.studio/fr/chaine1/chaine2</code> fonctionnent aussi, comme les URL façon multitwitch.</p></details>
+        <details><summary>Multiview est-il gratuit ? Faut-il un compte Twitch ?</summary><p>Multiview est gratuit, open source, sans compte ni téléchargement. Il utilise le lecteur Twitch officiel intégré : les streamers gardent leurs vues et leurs publicités exactement comme sur twitch.tv. Connectez-vous dans le cadre du chat si vous voulez y écrire.</p></details>
+        <details><summary>Multiview fonctionne-t-il pour le ZEvent ?</summary><p>Oui. Le <a href="/fr/zevent">mode ZEvent</a> lit la liste live officielle de zevent.fr et affiche automatiquement les 9 streams ZEvent les plus regardés, avec le nombre de viewers sur chaque étiquette et un bouton d'actualisation.</p></details>
+        <details><summary>Quelle différence avec multitwitch ou kadgar ?</summary><p>Au lieu d'une grille de cases égales, Multiview reproduit une régie de diffusion (un multiviewer façon ATEM) : un grand programme avec son chat et un bandeau de vignettes live avec étiquettes tally. La bascule ne recharge jamais un lecteur, donc les streams ne rebufferisent pas. L'outil est disponible en français et en anglais.</p></details>
+        <details><summary>Ça marche sur mobile ?</summary><p>Oui. Sur écran étroit, le chat passe sous le programme et les vignettes s'alignent en bas. Les lecteurs démarrent au clic : touchez lecture sur chaque aperçu que vous voulez voir tourner.</p></details>
+      </section>
+
+      <footer class="about-foot">
+        <p>Multiview est réalisé par <a href="https://github.com/augustinbegue">Augustin Bégué</a> et n'est pas affilié à Twitch. Twitch est une marque de Twitch Interactive, Inc. Les streams sont lus via le lecteur Twitch officiel ; rien n'est réhébergé.</p>
+        <p><a href="/fr/">Français</a> · <a href="/" hreflang="en" lang="en">English</a> · <a href="/fr/zevent">Multiview ZEvent</a> · <a href="/zevent" hreflang="en" lang="en">ZEvent multiview (EN)</a> · <a href="https://github.com/augustinbegue/multiview">GitHub</a></p>
+      </footer>
+    </article>

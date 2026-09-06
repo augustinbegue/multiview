@@ -52,6 +52,40 @@ A URL with `?c=` wins over anything stored locally and skips the setup screen.
 
 State also persists to `localStorage` under `multiview.state.v1`.
 
+## Pages, languages and SEO
+
+The build is multi-page: four static HTML entries share one app bundle, each with its
+own `<head>`, crawlable landing copy (h1, how-to, FAQ) and JSON-LD.
+
+| URL          | Language | Entry file        | JSON-LD                                          |
+| ------------ | -------- | ----------------- | ------------------------------------------------ |
+| `/`          | en       | `index.html`      | WebApplication, WebSite, Person, WebPage, FAQPage |
+| `/fr/`       | fr       | `fr/index.html`   | same, in French                                  |
+| `/zevent`    | en       | `zevent.html`     | WebPage, BreadcrumbList, Event (ZEvent 2026), FAQPage |
+| `/fr/zevent` | fr       | `fr/zevent.html`  | same, in French                                  |
+
+- `pages/` holds the shared partials: `head.html` (title, description, canonical,
+  hreflang en/fr/x-default, Open Graph, Twitter card, icons), `app.html` (the app
+  markup) and `about-<lang>[-zevent].html` (the landing copy rendered under the app).
+  `pages/strings.json` carries every static UI string and per-page metadata.
+- `vite.config.ts` expands `<!--#include name-->` and `{{key}}` at build time and in
+  dev, and rewrites the pretty URLs to the entry files on the dev server.
+- Dynamic UI strings come from `src/i18n.ts`, keyed on `<html lang>`. The EN/FR
+  button keeps the current `?c=` line-up.
+- Multitwitch-style paths work as an alias of `?c=`: `/zerator/gotaga` and
+  `/fr/zerator/gotaga`. They are normalised back to `?c=` so canonical stays `/`.
+- `public/` ships `robots.txt` (everything allowed except `/api/`), `sitemap.xml` with
+  hreflang alternates, `llms.txt`, `manifest.webmanifest`, `humans.txt`, the OG images
+  (`og-*.png`, 1200x630), icons and the IndexNow key file.
+- `scripts/indexnow.sh` pings IndexNow (Bing, Yandex, Naver, Seznam) for the four URLs
+  after a deploy. Google ignores IndexNow: submit `sitemap.xml` in Search Console.
+- nginx serves `/zevent` → `zevent.html`, redirects `*.html` and trailing-slash
+  variants to the canonical URL (301), sets `Content-Language`, and marks `/api/zevent`
+  `noindex`.
+
+The ZEvent pages are labelled as an unofficial fan tool, use no ZEvent logo and send
+donations to zevent.fr only.
+
 ## Development
 
 ```sh
@@ -72,5 +106,5 @@ docker run --rm -p 8080:8080 multiview   # http://localhost:8080
 ```
 
 The image serves the static build with unprivileged nginx on port 8080. Hashed
-assets under `/assets/` get a one-year immutable cache; `index.html` is never cached.
+assets under `/assets/` get a one-year immutable cache; HTML is never cached.
 Pushes to `main` publish `ghcr.io/augustinbegue/multiview`.

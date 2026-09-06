@@ -1,4 +1,5 @@
 import "./style.css";
+import { BASE, t } from "./i18n";
 
 /* ---------- Twitch embed typings (loaded from player.twitch.tv/js/embed/v1.js) ---------- */
 interface TwitchPlayer {
@@ -29,7 +30,7 @@ declare global {
 /* ---------- state ---------- */
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 9;
-const ZEVENT_MODE = /^\/zevent\/?$/.test(location.pathname);
+const ZEVENT_MODE = /^\/(fr\/)?zevent\/?$/.test(location.pathname);
 const ZEVENT_SLOTS = 9;
 const STORE_KEY = ZEVENT_MODE ? "multiview.zevent.v1" : "multiview.state.v1";
 const HOST = location.hostname || "localhost";
@@ -65,12 +66,19 @@ function readStored(): State | null {
   }
 }
 
+/* multitwitch-style paths (/a/b/c or /fr/a/b/c) are read like ?c=a,b,c */
+function pathChannels(): string[] {
+  const rest = location.pathname.startsWith(BASE) ? location.pathname.slice(BASE.length) : "";
+  return rest.split("/").map(clean).filter(Boolean);
+}
+
 function readUrl(): State | null {
   if (ZEVENT_MODE) return null;
   const params = new URLSearchParams(location.search);
   const c = params.get("c");
-  if (!c) return null;
-  const channels = c.split(",").map(clean).filter(Boolean).slice(0, MAX_SLOTS);
+  const list = c ? c.split(",") : pathChannels();
+  if (list.length === 0) return null;
+  const channels = list.map(clean).filter(Boolean).slice(0, MAX_SLOTS);
   if (channels.length < 1) return null;
   const slot = Number(params.get("m") ?? "1");
   return {
@@ -88,8 +96,20 @@ function persist(): void {
   if (!ZEVENT_MODE) params.set("c", state.channels.join(","));
   params.set("m", String(state.main + 1));
   if (state.mutedAll) params.set("mute", "1");
-  history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+  const path = ZEVENT_MODE ? location.pathname : BASE;
+  history.replaceState(null, "", `${path}?${params.toString()}`);
+  syncLangLink();
 }
+
+/* the EN/FR link keeps the current channels so a switch never loses the setup */
+const langLink = document.getElementById("lang-link") as HTMLAnchorElement | null;
+function syncLangLink(): void {
+  if (!langLink) return;
+  const url = new URL(langLink.href, location.origin);
+  url.search = location.search;
+  langLink.href = url.pathname + url.search;
+}
+syncLangLink();
 
 /* ---------- stage ---------- */
 const stage = el<HTMLElement>("#stage");
@@ -109,7 +129,7 @@ function buildStage(): void {
     tile.dataset.slot = String(i);
     tile.tabIndex = 0;
     tile.setAttribute("role", "button");
-    tile.setAttribute("aria-label", `Slot ${i + 1}: ${channel}`);
+    tile.setAttribute("aria-label", t.slot(i + 1, channel));
 
     const screen = document.createElement("div");
     screen.className = "screen";
@@ -193,7 +213,7 @@ function applyAudio(): void {
     player.setQuality("auto");
   });
   muteAllBtn.setAttribute("aria-pressed", String(state.mutedAll));
-  muteAllBtn.textContent = state.mutedAll ? "audio off" : "audio on";
+  muteAllBtn.textContent = state.mutedAll ? t.audioOff : t.audioOn;
 }
 
 /* the chat iframe is the only element allowed to be recreated on a switch */
@@ -205,13 +225,13 @@ function renderChat(): void {
   chatBox.dataset.channel = channel;
   const frame = document.createElement("iframe");
   frame.src = `https://www.twitch.tv/embed/${encodeURIComponent(channel)}/chat?parent=${encodeURIComponent(HOST)}&darkpopout`;
-  frame.title = `${channel} chat`;
+  frame.title = t.chat(channel);
   chatBox.replaceChildren(frame);
 }
 
 function renderStatus(): void {
   const line = document.getElementById("status-line");
-  if (line) line.textContent = `${state.channels.length} SOURCES / PGM ${state.main + 1}`;
+  if (line) line.textContent = t.status(state.channels.length, state.main + 1);
 }
 
 function tickClock(): void {
@@ -285,7 +305,7 @@ function setZeventError(message: string | null): void {
 
 function stampZeventUpdate(): void {
   zeventUpdated.hidden = false;
-  zeventUpdated.textContent = `last updated ${new Date().toTimeString().slice(0, 8)}`;
+  zeventUpdated.textContent = t.updated(new Date().toTimeString().slice(0, 8));
 }
 
 let flashTimer = 0;
@@ -293,7 +313,7 @@ function flashRefreshLabel(text: string): void {
   window.clearTimeout(flashTimer);
   zeventRefreshBtn.textContent = text;
   flashTimer = window.setTimeout(() => {
-    zeventRefreshBtn.textContent = "refresh channels";
+    zeventRefreshBtn.textContent = t.refresh;
   }, 1500);
 }
 
@@ -308,7 +328,7 @@ async function loadZevent(isRefresh: boolean): Promise<void> {
     stampZeventUpdate();
 
     if (unchanged && isRefresh) {
-      flashRefreshLabel("up to date");
+      flashRefreshLabel(t.upToDate);
       return;
     }
 
@@ -321,8 +341,8 @@ async function loadZevent(isRefresh: boolean): Promise<void> {
     tickClock();
   } catch (err) {
     console.error(err);
-    setZeventError("zevent.fr unreachable");
-    if (isRefresh) flashRefreshLabel("failed");
+    setZeventError(t.unreachable);
+    if (isRefresh) flashRefreshLabel(t.failed);
   } finally {
     zeventRefreshBtn.disabled = false;
   }
@@ -332,8 +352,8 @@ if (ZEVENT_MODE) {
   zeventBadge.hidden = false;
   zeventRefreshBtn.hidden = false;
   editBtn.hidden = true;
-  modeLink.href = "/";
-  modeLink.textContent = "manual";
+  modeLink.href = BASE;
+  modeLink.textContent = t.manual;
   zeventRefreshBtn.addEventListener("click", () => void loadZevent(true));
 }
 
@@ -360,12 +380,12 @@ function addSlot(value = ""): void {
   input.value = value;
   input.spellcheck = false;
   input.autocapitalize = "off";
-  input.placeholder = "twitch channel";
+  input.placeholder = t.placeholder;
   const del = document.createElement("button");
   del.type = "button";
   del.className = "slot-del";
   del.textContent = "×";
-  del.title = "Remove slot";
+  del.title = t.removeSlot;
   del.addEventListener("click", () => {
     if (slotInputs().length <= MIN_SLOTS) return;
     row.remove();
@@ -382,7 +402,7 @@ function renumber(): void {
     const num = row.querySelector(".slot-num");
     if (num) num.textContent = String(i + 1);
   });
-  slotCount.textContent = `${rows.length} of ${MAX_SLOTS} slots`;
+  slotCount.textContent = t.slotCount(rows.length, MAX_SLOTS);
 }
 
 function openSetup(): void {
@@ -407,7 +427,7 @@ setupForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const channels = slotInputs().map((i) => clean(i.value)).filter(Boolean);
   if (channels.length < MIN_SLOTS) {
-    setupError.textContent = `Enter at least ${MIN_SLOTS} channel names.`;
+    setupError.textContent = t.minChannels(MIN_SLOTS);
     return;
   }
   const changed = channels.join(",") !== state.channels.join(",");

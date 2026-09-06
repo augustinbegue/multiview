@@ -1,0 +1,7 @@
+# multiview.keepalive.studio
+# Search engines and AI answer engines are welcome; the API proxy is not content.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://multiview.keepalive.studio/sitemap.xml

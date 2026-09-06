@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <!--#include head-->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://multiview.keepalive.studio/#app",
+          "name": "Multiview",
+          "alternateName": ["Multitwitch français", "Multiview Twitch", "Multistream Twitch"],
+          "url": "https://multiview.keepalive.studio/fr/",
+          "description": "Application web gratuite pour regarder jusqu'à 9 streams Twitch en même temps dans une régie façon plateau TV : un programme avec son chat, les autres chaînes en vignettes live, bascule instantanée avec les touches 1 à 9. Sans compte ni téléchargement.",
+          "applicationCategory": "MultimediaApplication",
+          "operatingSystem": "Tous (navigateur web)",
+          "browserRequirements": "Nécessite JavaScript et un navigateur récent",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+          "inLanguage": ["fr", "en"],
+          "featureList": [
+            "Regarder 2 à 9 chaînes Twitch simultanément",
+            "Vue programme avec le chat Twitch de la chaîne à côté",
+            "Bandeau de vignettes live avec étiquettes façon tally",
+            "Bascule du programme avec les touches 1 à 9 ou un clic, sans recharger les lecteurs",
+            "Liens partageables : ?c=chaine1,chaine2 ou /chaine1/chaine2",
+            "Mode ZEvent : sélectionne automatiquement les 9 streams ZEvent les plus regardés"
+          ],
+          "screenshot": "https://multiview.keepalive.studio/og-fr.png",
+          "image": "https://multiview.keepalive.studio/og-fr.png",
+          "author": { "@id": "https://multiview.keepalive.studio/#author" },
+          "datePublished": "2026-09-06",
+          "dateModified": "2026-09-06",
+          "license": "https://github.com/augustinbegue/multiview",
+          "sameAs": ["https://github.com/augustinbegue/multiview"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://multiview.keepalive.studio/#website",
+          "url": "https://multiview.keepalive.studio/",
+          "name": "Multiview",
+          "inLanguage": ["en", "fr"],
+          "publisher": { "@id": "https://multiview.keepalive.studio/#author" }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://multiview.keepalive.studio/#author",
+          "name": "Augustin Bégué",
+          "url": "https://github.com/augustinbegue",
+          "sameAs": ["https://github.com/augustinbegue"]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://multiview.keepalive.studio/fr/#webpage",
+          "url": "https://multiview.keepalive.studio/fr/",
+          "name": "Multiview – Regarder plusieurs streams Twitch en même temps",
+          "inLanguage": "fr",
+          "isPartOf": { "@id": "https://multiview.keepalive.studio/#website" },
+          "about": { "@id": "https://multiview.keepalive.studio/#app" },
+          "dateModified": "2026-09-06"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Comment regarder plusieurs streams Twitch en même temps ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Ouvrez multiview.keepalive.studio/fr/, tapez un nom de chaîne Twitch par slot (2 à 9 chaînes) et cliquez sur Lancer le multiview. Toutes les chaînes jouent en direct en même temps : le programme est en grand avec son chat, les autres sont en vignettes. Appuyez sur 1 à 9 ou cliquez une vignette pour choisir le stream en programme, qui est le seul avec le son." }
+            },
+            {
+              "@type": "Question",
+              "name": "Combien de streams Twitch peut-on regarder en même temps ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Jusqu'à 9 chaînes Twitch simultanément. Chacune continue de jouer dans son slot ; seul le programme a le son, les autres sont coupées jusqu'à ce que vous les basculiez." }
+            },
+            {
+              "@type": "Question",
+              "name": "Peut-on partager son multiview avec un lien ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Oui. Les chaînes sont écrites dans l'URL sous la forme ?c=chaine1,chaine2,chaine3 (ajoutez &m=2 pour choisir le slot programme et &mute=1 pour démarrer sans son). Les liens de type multiview.keepalive.studio/fr/chaine1/chaine2 fonctionnent aussi, comme les URL façon multitwitch." }
+            },
+            {
+              "@type": "Question",
+              "name": "Multiview est-il gratuit ? Faut-il un compte Twitch ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Multiview est gratuit, open source, sans compte ni téléchargement. Il utilise le lecteur Twitch officiel intégré : les streamers gardent leurs vues et leurs publicités exactement comme sur twitch.tv. Connectez-vous dans le cadre du chat si vous voulez y écrire." }
+            },
+            {
+              "@type": "Question",
+              "name": "Multiview fonctionne-t-il pour le ZEvent ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Oui. Le mode ZEvent sur multiview.keepalive.studio/fr/zevent lit la liste live officielle de zevent.fr et affiche automatiquement les 9 streams ZEvent les plus regardés, avec le nombre de viewers sur chaque étiquette et un bouton d'actualisation." }
+            },
+            {
+              "@type": "Question",
+              "name": "Quelle différence avec multitwitch ou kadgar ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Au lieu d'une grille de cases égales, Multiview reproduit une régie de diffusion (un multiviewer façon ATEM) : un grand programme avec son chat et un bandeau de vignettes live avec étiquettes tally. La bascule ne recharge jamais un lecteur, donc les streams ne rebufferisent pas. L'outil est disponible en français et en anglais." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <!--#include app-->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

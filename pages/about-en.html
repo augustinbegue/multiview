@@ -1,0 +1,61 @@
+    <article id="about" class="about" lang="en">
+      <header class="about-head">
+        <h1>Watch multiple Twitch streams at once, laid out like a broadcast control room</h1>
+        <p class="about-lead"><strong>Multiview</strong> is a free, open-source web app that plays up to 9 Twitch channels at the same time: one large <em>program</em> feed with its Twitch chat, and every other channel live in a thumbnail strip with tally-style labels. Press <kbd>1</kbd>–<kbd>9</kbd> or click a thumbnail to switch program. No account, no download, no extension. <a href="/fr/" hreflang="fr" lang="fr">Version française</a>.</p>
+        <p class="about-meta">Updated 6 September 2026 · <a href="https://github.com/augustinbegue/multiview">Source code on GitHub</a> · <a href="/zevent">ZEvent multiview</a></p>
+      </header>
+
+      <section>
+        <h2>How to watch several Twitch streams at the same time</h2>
+        <ol>
+          <li>Type one Twitch channel name per slot (2 to 9 channels). Slot 1 starts on program.</li>
+          <li>Click <strong>Start multiview</strong>. Every channel starts playing at once; only the program feed has audio.</li>
+          <li>Press <kbd>1</kbd>–<kbd>9</kbd> or click a thumbnail's label bar to put it on program. Players are never reloaded, so nothing re-buffers.</li>
+          <li>Share the URL. Your line-up is written to it, for example <code>multiview.keepalive.studio/?c=zerator,gotaga,squeezie</code> or simply <code>multiview.keepalive.studio/zerator/gotaga/squeezie</code>.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Why a control-room layout instead of a grid</h2>
+        <p>Classic multitwitch sites tile every stream in an equal grid, so each one is small and you keep switching tabs to read chat. Multiview copies the multiviewer of a real broadcast switcher (an ATEM-style régie): the stream you care about is big, its chat sits beside it, and the others stay visible as live thumbnails so you notice when something happens. That is the layout used for tournaments, GTA RP servers, speedrun marathons and charity events such as <a href="/zevent">ZEvent</a>, where you want to follow one point of view without losing the others.</p>
+        <ul class="about-grid">
+          <li><strong>Up to 9 streams</strong> live at once, 2 minimum.</li>
+          <li><strong>Program + chat</strong>: the selected channel's chat is embedded next to it.</li>
+          <li><strong>Instant switching</strong> with number keys or a click, no reload.</li>
+          <li><strong>Shareable links</strong>: <code>?c=</code> list or <code>/channel1/channel2</code> paths.</li>
+          <li><strong>Audio follows program</strong>; one button mutes everything.</li>
+          <li><strong>Official Twitch player</strong>: views, ads, drops and chat work as on twitch.tv.</li>
+          <li><strong>ZEvent mode</strong>: auto-picks the 9 most-watched ZEvent channels.</li>
+          <li><strong>English and French</strong>, mobile layout included.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>URL parameters</h2>
+        <table>
+          <thead><tr><th>Parameter</th><th>Meaning</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>c</code></td><td>Comma-separated channels, in slot order</td><td><code>?c=zerator,gotaga,squeezie</code></td></tr>
+            <tr><td><code>m</code></td><td>Slot on program (1-based, default 1)</td><td><code>&amp;m=2</code></td></tr>
+            <tr><td><code>mute</code></td><td><code>1</code> to start with all audio muted</td><td><code>&amp;mute=1</code></td></tr>
+            <tr><td>path</td><td>Same as <code>c</code>, multitwitch-style</td><td><code>/zerator/gotaga</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="about-faq">
+        <h2>Frequently asked questions</h2>
+        <details><summary>How do I watch multiple Twitch streams at the same time?</summary><p>Open this page, type one Twitch channel name per slot (2 to 9 channels) and press Start multiview. Every channel plays live at once: the program feed is large with its chat, the others sit in a thumbnail strip. Press 1 to 9 or click a thumbnail to switch which stream is on program and has audio.</p></details>
+        <details><summary>How many Twitch streams can I watch at once?</summary><p>Up to 9 Twitch channels at the same time. Each one keeps playing in its own slot; only the program feed plays audio, the others are muted until you switch to them.</p></details>
+        <details><summary>Can I share my multiview setup with a link?</summary><p>Yes. The channels are written to the URL as <code>?c=channel1,channel2,channel3</code> (add <code>&amp;m=2</code> to pick the program slot and <code>&amp;mute=1</code> to start muted). Path links like <code>multiview.keepalive.studio/channel1/channel2</code> also work, the same way as multitwitch-style URLs.</p></details>
+        <details><summary>Is Multiview free and do I need a Twitch account?</summary><p>Multiview is free, open source and needs no account or download. It uses the official Twitch embedded player, so streamers still get their views and ad impressions exactly as on twitch.tv. Log in inside the chat frame if you want to write in chat.</p></details>
+        <details><summary>Does Multiview work for ZEvent?</summary><p>Yes. <a href="/zevent">ZEvent mode</a> reads the official live list from zevent.fr and puts the 9 most-watched ZEvent streams on screen automatically, with viewer counts on each label and a refresh button.</p></details>
+        <details><summary>What makes Multiview different from multitwitch or kadgar?</summary><p>Instead of an equal grid, Multiview copies a broadcast control room (an ATEM-style multiviewer): one large program feed with chat and a strip of live thumbnails with tally labels. Switching never reloads a player, so streams keep running without buffering. It is available in English and French.</p></details>
+        <details><summary>Does it work on mobile?</summary><p>Yes. On narrow screens the chat drops under the program feed and the thumbnails line up at the bottom. Players start on your click, so tap play on each preview you want running.</p></details>
+      </section>
+
+      <footer class="about-foot">
+        <p>Multiview is made by <a href="https://github.com/augustinbegue">Augustin Bégué</a> and is not affiliated with Twitch. Twitch is a trademark of Twitch Interactive, Inc. Streams are played through the official Twitch embed; nothing is re-hosted.</p>
+        <p><a href="/">English</a> · <a href="/fr/" hreflang="fr" lang="fr">Français</a> · <a href="/zevent">ZEvent multiview</a> · <a href="/fr/zevent" hreflang="fr" lang="fr">ZEvent multiview (FR)</a> · <a href="https://github.com/augustinbegue/multiview">GitHub</a></p>
+      </footer>
+    </article>

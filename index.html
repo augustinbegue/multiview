@@ -1,51 +1,106 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Multiview</title>
-    <meta name="description" content="Twitch multiview switcher laid out like a broadcast control room." />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23050607'/%3E%3Crect x='2' y='3' width='8' height='6' fill='%23ff1f1f'/%3E%3Crect x='11' y='3' width='3' height='6' fill='%23232830'/%3E%3Crect x='2' y='10' width='3.4' height='3' fill='%23232830'/%3E%3Crect x='6.3' y='10' width='3.4' height='3' fill='%23232830'/%3E%3C/svg%3E" />
-    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+    <!--#include head-->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://multiview.keepalive.studio/#app",
+          "name": "Multiview",
+          "alternateName": ["Twitch Multiview", "Multitwitch control room", "Twitch multi-stream viewer"],
+          "url": "https://multiview.keepalive.studio/",
+          "description": "Free web app to watch up to 9 Twitch streams at once in a broadcast control-room layout: one program feed with its chat, every other channel live in a thumbnail strip, instant switching with keys 1 to 9. No account, no download.",
+          "applicationCategory": "MultimediaApplication",
+          "operatingSystem": "Any (web browser)",
+          "browserRequirements": "Requires JavaScript and a modern browser",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+          "inLanguage": ["en", "fr"],
+          "featureList": [
+            "Watch 2 to 9 Twitch channels simultaneously",
+            "Program view with the channel's Twitch chat beside it",
+            "Live thumbnail strip with tally-style labels",
+            "Switch program with keys 1-9 or a click, without reloading players",
+            "Shareable URLs: ?c=channel1,channel2 or /channel1/channel2",
+            "ZEvent mode: auto-selects the 9 most-watched ZEvent streams"
+          ],
+          "screenshot": "https://multiview.keepalive.studio/og-en.png",
+          "image": "https://multiview.keepalive.studio/og-en.png",
+          "author": { "@id": "https://multiview.keepalive.studio/#author" },
+          "datePublished": "2026-09-06",
+          "dateModified": "2026-09-06",
+          "license": "https://github.com/augustinbegue/multiview",
+          "sameAs": ["https://github.com/augustinbegue/multiview"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://multiview.keepalive.studio/#website",
+          "url": "https://multiview.keepalive.studio/",
+          "name": "Multiview",
+          "inLanguage": ["en", "fr"],
+          "publisher": { "@id": "https://multiview.keepalive.studio/#author" }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://multiview.keepalive.studio/#author",
+          "name": "Augustin Bégué",
+          "url": "https://github.com/augustinbegue",
+          "sameAs": ["https://github.com/augustinbegue"]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://multiview.keepalive.studio/#webpage",
+          "url": "https://multiview.keepalive.studio/",
+          "name": "Multiview – Watch multiple Twitch streams at once",
+          "inLanguage": "en",
+          "isPartOf": { "@id": "https://multiview.keepalive.studio/#website" },
+          "about": { "@id": "https://multiview.keepalive.studio/#app" },
+          "dateModified": "2026-09-06"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I watch multiple Twitch streams at the same time?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Open multiview.keepalive.studio, type one Twitch channel name per slot (2 to 9 channels) and press Start multiview. Every channel plays live at once: the program feed is large with its chat, the others sit in a thumbnail strip. Press 1 to 9 or click a thumbnail to switch which stream is on program and has audio." }
+            },
+            {
+              "@type": "Question",
+              "name": "How many Twitch streams can I watch at once?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Up to 9 Twitch channels at the same time. Each one keeps playing in its own slot; only the program feed plays audio, the others are muted until you switch to them." }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I share my multiview setup with a link?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Yes. The channels are written to the URL as ?c=channel1,channel2,channel3 (add &m=2 to pick the program slot and &mute=1 to start muted). Path links like multiview.keepalive.studio/channel1/channel2 also work, the same way as multitwitch-style URLs." }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Multiview free and do I need a Twitch account?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Multiview is free, open source and needs no account or download. It uses the official Twitch embedded player, so streamers still get their views and ad impressions exactly as on twitch.tv. Log in inside the chat frame if you want to write in chat." }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Multiview work for ZEvent?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Yes. ZEvent mode at multiview.keepalive.studio/zevent reads the official live list from zevent.fr and puts the 9 most-watched ZEvent streams on screen automatically, with viewer counts on each label and a refresh button." }
+            },
+            {
+              "@type": "Question",
+              "name": "What makes Multiview different from multitwitch or kadgar?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Instead of an equal grid, Multiview copies a broadcast control room (an ATEM-style multiviewer): one large program feed with chat and a strip of live thumbnails with tally labels. Switching never reloads a player, so streams keep running without buffering. It is available in English and French." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="app">
-      <header id="bar">
-        <span class="bar-mark">MULTIVIEW</span>
-        <span id="zevent-badge" class="bar-badge" hidden>ZEVENT</span>
-        <span class="bar-hint">1&ndash;9 to switch &nbsp;/&nbsp; click a source label &nbsp;/&nbsp; press play on each preview</span>
-        <span id="zevent-error" class="bar-error" role="alert" hidden></span>
-        <div class="bar-actions">
-          <span id="zevent-updated" class="bar-updated" hidden></span>
-          <button id="zevent-refresh" type="button" class="btn" hidden>refresh channels</button>
-          <a id="mode-link" class="btn" href="/zevent">ZEVENT mode</a>
-          <button id="mute-all" type="button" class="btn" aria-pressed="false">audio on</button>
-          <button id="edit" type="button" class="btn btn-icon" title="Edit channels" aria-label="Edit channels">
-            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M12 8.6A3.4 3.4 0 1 0 12 15.4 3.4 3.4 0 0 0 12 8.6Zm0 5.4a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/><path fill="currentColor" d="m20.3 13.6.1-1.6-.1-1.6 1.7-1.3-1.7-2.9-2 .7a7.9 7.9 0 0 0-2.8-1.6L15.2 3H8.8l-.3 2.3a7.9 7.9 0 0 0-2.8 1.6l-2-.7L2 9.1l1.7 1.3a9.6 9.6 0 0 0 0 3.2L2 14.9l1.7 2.9 2-.7a7.9 7.9 0 0 0 2.8 1.6l.3 2.3h6.4l.3-2.3a7.9 7.9 0 0 0 2.8-1.6l2 .7 1.7-2.9-1.7-1.3ZM12 17.4A5.4 5.4 0 1 1 12 6.6a5.4 5.4 0 0 1 0 10.8Z"/></svg>
-          </button>
-        </div>
-      </header>
-      <main id="stage" aria-label="Multiview sources"></main>
-    </div>
-
-    <div id="setup" class="setup" hidden>
-      <form id="setup-form" class="setup-card">
-        <h1 class="setup-title">Sources</h1>
-        <p class="setup-lead">Enter the Twitch channel for each slot. Slot 1 starts on program.</p>
-        <div id="slots" class="slots"></div>
-        <div class="setup-row">
-          <button type="button" id="add-slot" class="btn">Add slot</button>
-          <span id="slot-count" class="setup-count"></span>
-        </div>
-        <p class="setup-lead"><a class="setup-link" href="/zevent">ZEVENT mode &rarr;</a> &mdash; the top 9 ZEVENT streams by viewers, refreshed on demand.</p>
-        <p id="setup-error" class="setup-error" role="alert"></p>
-        <div class="setup-foot">
-          <button type="button" id="setup-cancel" class="btn">Cancel</button>
-          <button type="submit" class="btn btn-go">Start multiview</button>
-        </div>
-      </form>
-    </div>
-
+    <!--#include app-->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

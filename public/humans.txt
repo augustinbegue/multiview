@@ -1,0 +1,9 @@
+/* TEAM */
+Developer: Augustin Bégué
+Site: https://github.com/augustinbegue
+Location: France
+
+/* SITE */
+Last update: 2026-09-06
+Languages: English, Français
+Stack: Vite, TypeScript, Twitch Embed, nginx
