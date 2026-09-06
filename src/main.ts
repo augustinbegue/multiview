@@ -115,47 +115,13 @@ syncLangLink();
 const stage = el<HTMLElement>("#stage");
 const muteAllBtn = el<HTMLButtonElement>("#mute-all");
 const players = new Map<string, TwitchPlayer>();
-const tiles: HTMLElement[] = [];
+const tiles = new Map<string, HTMLElement>();
 let chatBox: HTMLElement | null = null;
 
 function buildStage(): void {
   stage.replaceChildren();
-  tiles.length = 0;
+  tiles.clear();
   players.clear();
-
-  state.channels.forEach((channel, i) => {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    tile.dataset.slot = String(i);
-    tile.tabIndex = 0;
-    tile.setAttribute("role", "button");
-    tile.setAttribute("aria-label", t.slot(i + 1, channel));
-
-    const screen = document.createElement("div");
-    screen.className = "screen";
-    screen.id = `screen-${i}`;
-
-    const label = document.createElement("div");
-    label.className = "label";
-    label.innerHTML =
-      `<span class="label-num">${i + 1}</span>` +
-      `<span class="label-name"></span>` +
-      `<span class="label-count"></span>` +
-      `<span class="label-tag"></span>`;
-    label.querySelector<HTMLElement>(".label-name")!.textContent = channel;
-    const count = label.querySelector<HTMLElement>(".label-count");
-    if (count) count.textContent = ZEVENT_MODE ? (zeventCounts.get(channel) ?? "") : "";
-
-    tile.append(screen, label);
-    stage.append(tile);
-    tiles.push(tile);
-
-    const activate = (): void => selectSlot(i);
-    label.addEventListener("click", activate);
-    tile.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); }
-    });
-  });
 
   chatBox = document.createElement("aside");
   chatBox.id = "chat";
@@ -165,6 +131,52 @@ function buildStage(): void {
   status.id = "status";
   status.innerHTML = `<div class="clock" id="clock">--:--:--</div><div class="status-line" id="status-line"></div>`;
   stage.append(status);
+
+  syncStage();
+}
+
+/* Reconcile tiles/players with state.channels without touching the ones that
+   stay: a tile is keyed by channel, its slot number and grid position are
+   pure CSS/label updates (moving an iframe in the DOM would reload it). */
+function syncStage(): void {
+  const wanted = new Set(state.channels);
+  tiles.forEach((tile, channel) => {
+    if (wanted.has(channel)) return;
+    tile.remove();
+    tiles.delete(channel);
+    players.delete(channel);
+  });
+  state.channels.forEach((channel) => {
+    if (tiles.has(channel)) return;
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.dataset.channel = channel;
+    tile.tabIndex = 0;
+    tile.setAttribute("role", "button");
+
+    const screen = document.createElement("div");
+    screen.className = "screen";
+    screen.id = `screen-${channel}`;
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.innerHTML =
+      `<span class="label-num"></span>` +
+      `<span class="label-name"></span>` +
+      `<span class="label-count"></span>` +
+      `<span class="label-tag"></span>`;
+    label.querySelector<HTMLElement>(".label-name")!.textContent = channel;
+
+    tile.append(screen, label);
+    stage.append(tile);
+    tiles.set(channel, tile);
+
+    const activate = (): void => selectSlot(state.channels.indexOf(channel));
+    label.addEventListener("click", activate);
+    tile.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); }
+    });
+  });
 
   stage.style.setProperty("--sides", String(Math.max(1, state.channels.length - 1)));
   mountPlayers();
@@ -177,9 +189,9 @@ function mountPlayers(): void {
     window.setTimeout(mountPlayers, 250);
     return;
   }
-  state.channels.forEach((channel, i) => {
-    if (players.has(channel + i)) return;
-    const player = new Twitch.Player(`screen-${i}`, {
+  state.channels.forEach((channel) => {
+    if (players.has(channel)) return;
+    const player = new Twitch.Player(`screen-${channel}`, {
       channel,
       parent: [HOST],
       muted: true,
@@ -187,17 +199,24 @@ function mountPlayers(): void {
       width: "100%",
       height: "100%",
     });
-    players.set(channel + i, player);
-
+    players.set(channel, player);
   });
   applyAudio();
 }
 
 function applyLayout(): void {
-  tiles.forEach((tile, i) => {
+  state.channels.forEach((channel, i) => {
+    const tile = tiles.get(channel);
+    if (!tile) return;
     const isMain = i === state.main;
     tile.classList.toggle("is-main", isMain);
     tile.classList.toggle("is-side", !isMain);
+    tile.style.order = String(i);
+    tile.setAttribute("aria-label", t.slot(i + 1, channel));
+    const num = tile.querySelector<HTMLElement>(".label-num");
+    if (num) num.textContent = String(i + 1);
+    const count = tile.querySelector<HTMLElement>(".label-count");
+    if (count) count.textContent = ZEVENT_MODE ? (zeventCounts.get(channel) ?? "") : "";
     const tag = tile.querySelector<HTMLElement>(".label-tag");
     if (tag) tag.textContent = isMain ? "PGM" : "";
   });
@@ -207,7 +226,7 @@ function applyLayout(): void {
 
 function applyAudio(): void {
   state.channels.forEach((channel, i) => {
-    const player = players.get(channel + i);
+    const player = players.get(channel);
     if (!player) return;
     player.setMuted(state.mutedAll || i !== state.main);
     player.setQuality("auto");
@@ -328,16 +347,23 @@ async function loadZevent(isRefresh: boolean): Promise<void> {
     stampZeventUpdate();
 
     if (unchanged && isRefresh) {
+      applyLayout(); // viewer counts may have moved
       flashRefreshLabel(t.upToDate);
       return;
     }
 
-    // keep the persisted program slot only if that channel is still at the same index
+    // keep the program on the same channel if it is still in the list
     const previous = state.channels[state.main];
-    const main = previous && feed.channels[state.main] === previous ? state.main : 0;
+    const keep = previous === undefined ? -1 : feed.channels.indexOf(previous);
+    const main = keep >= 0 ? keep : 0;
     state = { channels: feed.channels, main, mutedAll: state.mutedAll };
     persist();
-    buildStage();
+    if (tiles.size === 0) buildStage();
+    else {
+      syncStage();
+      applyAudio();
+      flashRefreshLabel(t.upToDate);
+    }
     tickClock();
   } catch (err) {
     console.error(err);
@@ -434,7 +460,8 @@ setupForm.addEventListener("submit", (e) => {
   state = { channels, main: Math.min(state.main, channels.length - 1), mutedAll: state.mutedAll };
   persist();
   closeSetup();
-  if (changed || tiles.length === 0) buildStage();
+  if (tiles.size === 0) buildStage();
+  else if (changed) { syncStage(); applyAudio(); }
 });
 
 muteAllBtn.addEventListener("click", () => {
