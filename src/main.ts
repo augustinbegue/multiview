@@ -131,7 +131,7 @@ function buildStage(): void {
     tiles.push(tile);
 
     const activate = (): void => selectSlot(i);
-    tile.addEventListener("click", activate);
+    label.addEventListener("click", activate);
     tile.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); }
     });
@@ -163,7 +163,7 @@ function mountPlayers(): void {
       channel,
       parent: [HOST],
       muted: true,
-      autoplay: true,
+      autoplay: false,
       width: "100%",
       height: "100%",
     });
