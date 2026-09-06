@@ -114,6 +114,7 @@ syncLangLink();
 /* ---------- stage ---------- */
 const stage = el<HTMLElement>("#stage");
 const muteAllBtn = el<HTMLButtonElement>("#mute-all");
+const fullscreenBtn = el<HTMLButtonElement>("#fullscreen");
 const players = new Map<string, TwitchPlayer>();
 const tiles = new Map<string, HTMLElement>();
 let chatBox: HTMLElement | null = null;
@@ -470,11 +471,22 @@ muteAllBtn.addEventListener("click", () => {
   persist();
 });
 
+function toggleFullscreen(): void {
+  if (document.fullscreenElement) void document.exitFullscreen();
+  else void document.documentElement.requestFullscreen().catch(() => {});
+}
+fullscreenBtn.addEventListener("click", toggleFullscreen);
+document.addEventListener("fullscreenchange", () => {
+  fullscreenBtn.setAttribute("aria-pressed", String(Boolean(document.fullscreenElement)));
+});
+if (!document.fullscreenEnabled) fullscreenBtn.hidden = true;
+
 window.addEventListener("keydown", (e) => {
   if (!setup.hidden) return;
   const target = e.target as HTMLElement | null;
   if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
   if (e.key >= "1" && e.key <= "9") selectSlot(Number(e.key) - 1);
+  if (e.key === "f" || e.key === "F") toggleFullscreen();
 });
 
 /* ---------- boot ---------- */

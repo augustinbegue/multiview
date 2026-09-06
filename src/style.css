@@ -79,6 +79,9 @@ button { font: inherit; color: inherit; }
 .btn-icon:hover { color: var(--ink); }
 #mute-all[aria-pressed="false"] { color: var(--audio); border-color: #1d4c37; }
 #mute-all[aria-pressed="true"] { color: var(--ink-dim); }
+#fullscreen .ico-exit { display: none; }
+#fullscreen[aria-pressed="true"] .ico-enter { display: none; }
+#fullscreen[aria-pressed="true"] .ico-exit { display: block; }
 
 /* ---- stage ---- */
 #stage {
