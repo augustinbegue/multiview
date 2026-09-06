@@ -141,20 +141,7 @@ button { font: inherit; color: inherit; }
 .tile.is-side:hover .label { background: #1b2129; }
 
 .screen { position: relative; min-height: 0; background: #000; overflow: hidden; }
-/* Twitch refuses to play in iframes under 400x300: render every player at a
-   fixed 1280x720 layout size and shrink it visually with a transform, which
-   the iframe cannot see. --s / --ox / --oy are set by a ResizeObserver. */
-.screen iframe {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1280px;
-  height: 720px;
-  border: 0;
-  transform-origin: 0 0;
-  transform: translate(var(--ox, 0px), var(--oy, 0px)) scale(var(--s, 1));
-}
+.screen iframe { display: block; width: 100%; height: 100%; border: 0; }
 /* keep pointer events off side players so the whole tile is a switch button */
 .is-side .screen { pointer-events: none; }
 
