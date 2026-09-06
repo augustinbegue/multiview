@@ -20,9 +20,6 @@ interface TwitchPlayerOptions {
 type TwitchGlobal = {
   Player: {
     new (id: string, options: TwitchPlayerOptions): TwitchPlayer;
-    READY: string;
-    PLAYBACK_BLOCKED: string;
-    PLAYING: string;
   };
 };
 declare global {
@@ -101,68 +98,10 @@ const players = new Map<string, TwitchPlayer>();
 const tiles: HTMLElement[] = [];
 let chatBox: HTMLElement | null = null;
 
-/* ---------- autoplay: nudge every player until it reports PLAYING ---------- */
-const startOverlay = el<HTMLElement>("#start");
-const stalled = new Set<TwitchPlayer>();   // created but never reached PLAYING
-let gestureSeen = false;
-const NUDGE_DELAYS = [1500, 3000, 6000, 10000, 15000];
-const OVERLAY_AFTER = 6000;
-let nudgeTimers: number[] = [];
-
-function markGesture(): void {
-  gestureSeen = true;
-}
-document.addEventListener("pointerdown", markGesture);
-document.addEventListener("keydown", markGesture);
-
-function showStartOverlay(): void {
-  if (!setup.hidden) return;
-  startOverlay.hidden = false;
-}
-
-function hideStartOverlay(): void {
-  startOverlay.hidden = true;
-}
-
-function nudgeStalled(): void {
-  stalled.forEach((p) => p.play());
-}
-
-function playAll(): void {
-  players.forEach((p) => p.play());
-  applyAudio();
-  hideStartOverlay();
-}
-
-function scheduleNudges(): void {
-  nudgeTimers.forEach((t) => window.clearTimeout(t));
-  nudgeTimers = NUDGE_DELAYS.map((ms) => window.setTimeout(nudgeStalled, ms));
-  nudgeTimers.push(
-    window.setTimeout(() => {
-      if (stalled.size > 0 && !gestureSeen) showStartOverlay();
-    }, OVERLAY_AFTER),
-  );
-}
-
-startOverlay.addEventListener("click", playAll);
-document.addEventListener("pointerdown", () => {
-  if (!startOverlay.hidden) playAll();
-  else if (stalled.size > 0) nudgeStalled();
-});
-document.addEventListener("keydown", (e) => {
-  if (!startOverlay.hidden) {
-    e.preventDefault();
-    playAll();
-  } else if (stalled.size > 0) {
-    nudgeStalled();
-  }
-});
-
 function buildStage(): void {
   stage.replaceChildren();
   tiles.length = 0;
   players.clear();
-  stalled.clear();
 
   state.channels.forEach((channel, i) => {
     const tile = document.createElement("div");
@@ -230,21 +169,8 @@ function mountPlayers(): void {
     });
     players.set(channel + i, player);
 
-    stalled.add(player);
-    player.addEventListener(Twitch.Player.READY, () => {
-      player.play();
-    });
-    player.addEventListener(Twitch.Player.PLAYBACK_BLOCKED, () => {
-      stalled.add(player);
-      if (gestureSeen) window.setTimeout(() => player.play(), 500);
-    });
-    player.addEventListener(Twitch.Player.PLAYING, () => {
-      stalled.delete(player);
-      if (stalled.size === 0) hideStartOverlay();
-    });
   });
   applyAudio();
-  scheduleNudges();
 }
 
 function applyLayout(): void {
@@ -479,7 +405,6 @@ cancelBtn.addEventListener("click", closeSetup);
 
 setupForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  gestureSeen = true;
   const channels = slotInputs().map((i) => clean(i.value)).filter(Boolean);
   if (channels.length < MIN_SLOTS) {
     setupError.textContent = `Enter at least ${MIN_SLOTS} channel names.`;

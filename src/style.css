@@ -37,37 +37,6 @@ button { font: inherit; color: inherit; }
   position: relative;
 }
 
-/* ---- autoplay-blocked overlay ---- */
-#start {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: rgba(5, 6, 7, 0.92);
-  backdrop-filter: blur(2px);
-  cursor: pointer;
-  user-select: none;
-}
-#start[hidden] { display: none; }
-.start-label {
-  font-family: var(--mono);
-  font-size: clamp(28px, 5vw, 56px);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--tally);
-  text-shadow: 0 0 24px rgba(255, 31, 31, 0.45);
-}
-.start-sub {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: var(--ink-dim);
-}
-
 /* ---- top bar ---- */
 #bar {
   display: flex;
