@@ -1,0 +1,218 @@
+/* Multiview — broadcast control-room surface.
+   Palette: rack black, panel graphite, hairline steel, tally red, audio green. */
+:root {
+  --rack: #050607;
+  --panel: #0c0f12;
+  --panel-hi: #141920;
+  --hair: #232830;
+  --hair-hi: #39414c;
+  --ink: #dfe4ea;
+  --ink-dim: #6f7883;
+  --tally: #ff1f1f;
+  --audio: #24d17a;
+  --strip: clamp(96px, 15vh, 168px);
+  --chat: clamp(240px, 22vw, 360px);
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--rack);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; }
+
+#app {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: 34px 1fr;
+}
+
+/* ---- top bar ---- */
+#bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--hair);
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+}
+.bar-mark {
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  font-size: 12px;
+  color: var(--ink);
+}
+.bar-hint {
+  color: var(--ink-dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar-actions { margin-left: auto; display: flex; gap: 6px; }
+
+.btn {
+  background: var(--panel-hi);
+  border: 1px solid var(--hair);
+  border-radius: 2px;
+  padding: 4px 9px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--hair-hi); background: #1b2129; }
+.btn:focus-visible { outline: 2px solid var(--audio); outline-offset: 1px; }
+.btn-icon { display: grid; place-items: center; padding: 3px 6px; color: var(--ink-dim); }
+.btn-icon:hover { color: var(--ink); }
+#mute-all[aria-pressed="false"] { color: var(--audio); border-color: #1d4c37; }
+#mute-all[aria-pressed="true"] { color: var(--ink-dim); }
+
+/* ---- stage ---- */
+#stage {
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  min-height: 0;
+  grid-template-rows: 1fr var(--strip);
+  grid-template-columns: repeat(var(--sides, 1), 1fr) var(--chat);
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 17px;
+  min-width: 0;
+  min-height: 0;
+  background: #000;
+  border: 1px solid var(--hair);
+  cursor: pointer;
+}
+.tile.is-main {
+  grid-row: 1;
+  grid-column: 1 / -2;
+  border-color: var(--tally);
+  box-shadow: 0 0 0 1px var(--tally), 0 0 22px -8px var(--tally);
+  cursor: default;
+}
+.tile.is-side { grid-row: 2; }
+.tile.is-side:hover { border-color: var(--hair-hi); }
+.tile.is-side:hover .label { background: #1b2129; }
+
+.screen { position: relative; min-height: 0; background: #000; overflow: hidden; }
+.screen iframe { display: block; width: 100%; height: 100%; border: 0; }
+/* keep pointer events off side players so the whole tile is a switch button */
+.is-side .screen { pointer-events: none; }
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 6px;
+  background: var(--panel);
+  border-top: 1px solid var(--hair);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+  overflow: hidden;
+}
+.is-main .label { background: var(--tally); color: #fff; border-top-color: var(--tally); }
+.label-num {
+  flex: none;
+  min-width: 13px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--panel-hi);
+  border: 1px solid var(--hair);
+  line-height: 12px;
+}
+.is-main .label-num { background: #000; border-color: #000; color: #fff; }
+.label-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.label-tag { margin-left: auto; flex: none; letter-spacing: 0.2em; }
+.is-main .label-tag { font-weight: 700; }
+
+/* ---- chat + clock column ---- */
+#chat {
+  grid-row: 1;
+  grid-column: -2 / -1;
+  min-width: 0;
+  border: 1px solid var(--hair);
+  background: #0a0c0f;
+}
+#chat iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+#status {
+  grid-row: 2;
+  grid-column: -2 / -1;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px;
+}
+.clock { font-size: clamp(18px, 3.4vh, 30px); font-weight: 700; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.status-line { font-size: 10px; letter-spacing: 0.16em; color: var(--ink-dim); text-align: center; }
+
+/* ---- setup ---- */
+.setup {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(3, 4, 5, 0.88);
+  overflow: auto;
+  z-index: 10;
+}
+.setup[hidden] { display: none; }
+.setup-card {
+  width: min(460px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--hair);
+  border-top: 2px solid var(--tally);
+  padding: 20px;
+}
+.setup-title { margin: 0; font-size: 15px; letter-spacing: 0.3em; font-weight: 700; }
+.setup-lead { margin: 6px 0 16px; color: var(--ink-dim); font-size: 11px; line-height: 1.6; max-width: 62ch; }
+.slots { display: grid; gap: 5px; }
+.slot { display: flex; align-items: center; gap: 7px; }
+.slot-num {
+  flex: none; width: 20px; text-align: center; font-weight: 700; font-size: 11px;
+  color: var(--ink-dim); border: 1px solid var(--hair); line-height: 24px;
+}
+.slot input {
+  flex: 1; min-width: 0; background: #05070a; color: var(--ink);
+  border: 1px solid var(--hair); border-radius: 2px; padding: 5px 8px; font: inherit;
+}
+.slot input:focus { outline: none; border-color: var(--hair-hi); }
+.slot-del { background: none; border: 1px solid transparent; color: var(--ink-dim); cursor: pointer; padding: 2px 7px; }
+.slot-del:hover { color: var(--tally); border-color: var(--hair); }
+.setup-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.setup-count { color: var(--ink-dim); font-size: 10px; letter-spacing: 0.14em; }
+.setup-error { margin: 10px 0 0; color: var(--tally); font-size: 11px; min-height: 14px; }
+.setup-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.btn-go { background: var(--tally); border-color: var(--tally); color: #fff; font-weight: 700; }
+.btn-go:hover { background: #e01414; border-color: #e01414; }
+
+/* ---- narrow screens: chat drops under the program view ---- */
+@media (max-width: 760px) {
+  :root { --strip: clamp(72px, 12vh, 110px); }
+  #stage { grid-template-columns: repeat(var(--sides, 1), 1fr); grid-template-rows: 1fr 34vh var(--strip); }
+  .tile.is-main { grid-column: 1 / -1; }
+  .tile.is-side { grid-row: 3; }
+  #chat { grid-row: 2; grid-column: 1 / -1; }
+  #status { display: none; }
+  .bar-hint { display: none; }
+}
