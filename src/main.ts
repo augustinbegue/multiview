@@ -101,10 +101,13 @@ const players = new Map<string, TwitchPlayer>();
 const tiles: HTMLElement[] = [];
 let chatBox: HTMLElement | null = null;
 
-/* ---------- autoplay-blocked overlay ---------- */
+/* ---------- autoplay: nudge every player until it reports PLAYING ---------- */
 const startOverlay = el<HTMLElement>("#start");
-const blocked = new Set<TwitchPlayer>();
+const stalled = new Set<TwitchPlayer>();   // created but never reached PLAYING
 let gestureSeen = false;
+const NUDGE_DELAYS = [1500, 3000, 6000, 10000, 15000];
+const OVERLAY_AFTER = 6000;
+let nudgeTimers: number[] = [];
 
 function markGesture(): void {
   gestureSeen = true;
@@ -121,22 +124,37 @@ function hideStartOverlay(): void {
   startOverlay.hidden = true;
 }
 
+function nudgeStalled(): void {
+  stalled.forEach((p) => p.play());
+}
+
 function playAll(): void {
-  blocked.forEach((p) => p.play());
   players.forEach((p) => p.play());
   applyAudio();
   hideStartOverlay();
-  blocked.clear();
+}
+
+function scheduleNudges(): void {
+  nudgeTimers.forEach((t) => window.clearTimeout(t));
+  nudgeTimers = NUDGE_DELAYS.map((ms) => window.setTimeout(nudgeStalled, ms));
+  nudgeTimers.push(
+    window.setTimeout(() => {
+      if (stalled.size > 0 && !gestureSeen) showStartOverlay();
+    }, OVERLAY_AFTER),
+  );
 }
 
 startOverlay.addEventListener("click", playAll);
 document.addEventListener("pointerdown", () => {
   if (!startOverlay.hidden) playAll();
+  else if (stalled.size > 0) nudgeStalled();
 });
 document.addEventListener("keydown", (e) => {
   if (!startOverlay.hidden) {
     e.preventDefault();
     playAll();
+  } else if (stalled.size > 0) {
+    nudgeStalled();
   }
 });
 
@@ -144,6 +162,7 @@ function buildStage(): void {
   stage.replaceChildren();
   tiles.length = 0;
   players.clear();
+  stalled.clear();
 
   state.channels.forEach((channel, i) => {
     const tile = document.createElement("div");
@@ -211,25 +230,21 @@ function mountPlayers(): void {
     });
     players.set(channel + i, player);
 
+    stalled.add(player);
     player.addEventListener(Twitch.Player.READY, () => {
       player.play();
     });
-    let retried = false;
     player.addEventListener(Twitch.Player.PLAYBACK_BLOCKED, () => {
-      blocked.add(player);
-      if (gestureSeen && !retried) {
-        retried = true;
-        window.setTimeout(() => player.play(), 500);
-      } else {
-        showStartOverlay();
-      }
+      stalled.add(player);
+      if (gestureSeen) window.setTimeout(() => player.play(), 500);
     });
     player.addEventListener(Twitch.Player.PLAYING, () => {
-      blocked.delete(player);
-      if (blocked.size === 0) hideStartOverlay();
+      stalled.delete(player);
+      if (stalled.size === 0) hideStartOverlay();
     });
   });
   applyAudio();
+  scheduleNudges();
 }
 
 function applyLayout(): void {
