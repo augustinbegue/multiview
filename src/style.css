@@ -10,7 +10,8 @@
   --ink-dim: #6f7883;
   --tally: #ff1f1f;
   --audio: #24d17a;
-  --strip: clamp(96px, 15vh, 168px);
+  --side-w: 400px;
+  --side-h: calc(300px + 17px + 2px);
   --chat: clamp(240px, 22vw, 360px);
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
 }
@@ -110,13 +111,19 @@ button { font: inherit; color: inherit; }
 #mute-all[aria-pressed="true"] { color: var(--ink-dim); }
 
 /* ---- stage ---- */
+/* Twitch refuses playback in players under 400x300 and when they are scaled,
+   so side tiles are laid out at real size (>= --side-w x --side-h) in as many
+   rows as needed; the stage scrolls when the screen is too small. */
 #stage {
   display: grid;
   gap: 4px;
   padding: 4px;
   min-height: 0;
-  grid-template-rows: 1fr var(--strip);
-  grid-template-columns: repeat(var(--sides, 1), 1fr) var(--chat);
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(var(--side-w), 1fr));
+  grid-template-rows: minmax(max(300px, 55vh), 1fr);
+  grid-auto-rows: var(--side-h);
+  grid-auto-flow: row dense;
 }
 
 .tile {
@@ -136,25 +143,12 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 0 0 1px var(--tally), 0 0 22px -8px var(--tally);
   cursor: default;
 }
-.tile.is-side { grid-row: 2; }
+.tile.is-side { grid-row: auto; }
 .tile.is-side:hover { border-color: var(--hair-hi); }
 .tile.is-side:hover .label { background: #1b2129; }
 
 .screen { position: relative; min-height: 0; background: #000; overflow: hidden; }
-/* Twitch refuses to play in iframes under 400x300: render every player at a
-   fixed 1280x720 layout size and shrink it visually with a transform, which
-   the iframe cannot see. --s / --ox / --oy are set by a ResizeObserver. */
-.screen iframe {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1280px;
-  height: 720px;
-  border: 0;
-  transform-origin: 0 0;
-  transform: translate(var(--ox, 0px), var(--oy, 0px)) scale(var(--s, 1));
-}
+.screen iframe { display: block; width: 100%; height: 100%; border: 0; }
 /* keep pointer events off side players so the whole tile is a switch button */
 .is-side .screen { pointer-events: none; }
 
@@ -197,8 +191,7 @@ button { font: inherit; color: inherit; }
 #chat iframe { display: block; width: 100%; height: 100%; border: 0; }
 
 #status {
-  grid-row: 2;
-  grid-column: -2 / -1;
+  display: none;
   border: 1px solid var(--hair);
   background: var(--panel);
   display: grid;
@@ -253,10 +246,9 @@ button { font: inherit; color: inherit; }
 
 /* ---- narrow screens: chat drops under the program view ---- */
 @media (max-width: 760px) {
-  :root { --strip: clamp(72px, 12vh, 110px); }
-  #stage { grid-template-columns: repeat(var(--sides, 1), 1fr); grid-template-rows: 1fr 34vh var(--strip); }
+  #stage { grid-template-columns: 1fr; grid-template-rows: minmax(300px, 50vh) 34vh; }
   .tile.is-main { grid-column: 1 / -1; }
-  .tile.is-side { grid-row: 3; }
+  .tile.is-side { grid-row: auto; }
   #chat { grid-row: 2; grid-column: 1 / -1; }
   #status { display: none; }
   .bar-hint { display: none; }

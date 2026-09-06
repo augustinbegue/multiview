@@ -36,21 +36,6 @@ const ZEVENT_MODE = /^\/zevent\/?$/.test(location.pathname);
 const ZEVENT_SLOTS = 9;
 const STORE_KEY = ZEVENT_MODE ? "multiview.zevent.v1" : "multiview.state.v1";
 const HOST = location.hostname || "localhost";
-/* fixed player layout size; visually scaled per tile (Twitch min autoplay size is 400x300) */
-const PLAYER_W = 1280;
-const PLAYER_H = 720;
-
-const screenSizer = new ResizeObserver((entries) => {
-  for (const entry of entries) {
-    const box = entry.target as HTMLElement;
-    const { width, height } = entry.contentRect;
-    if (width === 0 || height === 0) continue;
-    const s = Math.min(width / PLAYER_W, height / PLAYER_H);
-    box.style.setProperty("--s", String(s));
-    box.style.setProperty("--ox", `${(width - PLAYER_W * s) / 2}px`);
-    box.style.setProperty("--oy", `${(height - PLAYER_H * s) / 2}px`);
-  }
-});
 
 type State = { channels: string[]; main: number; mutedAll: boolean };
 
@@ -149,6 +134,20 @@ function playAll(): void {
   hideStartOverlay();
 }
 
+/* tiles scrolled into view get nudged if they never started */
+const tileWatcher = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const i = Number((entry.target as HTMLElement).dataset.slot);
+      const channel = state.channels[i];
+      const player = channel === undefined ? undefined : players.get(channel + i);
+      if (player && stalled.has(player)) player.play();
+    }
+  },
+  { threshold: 0.6 },
+);
+
 function scheduleNudges(): void {
   nudgeTimers.forEach((t) => window.clearTimeout(t));
   nudgeTimers = NUDGE_DELAYS.map((ms) => window.setTimeout(nudgeStalled, ms));
@@ -178,7 +177,7 @@ function buildStage(): void {
   tiles.length = 0;
   players.clear();
   stalled.clear();
-  screenSizer.disconnect();
+  tileWatcher.disconnect();
 
   state.channels.forEach((channel, i) => {
     const tile = document.createElement("div");
@@ -191,7 +190,6 @@ function buildStage(): void {
     const screen = document.createElement("div");
     screen.className = "screen";
     screen.id = `screen-${i}`;
-    screenSizer.observe(screen);
 
     const label = document.createElement("div");
     label.className = "label";
@@ -207,6 +205,7 @@ function buildStage(): void {
     tile.append(screen, label);
     stage.append(tile);
     tiles.push(tile);
+    tileWatcher.observe(tile);
 
     const activate = (): void => selectSlot(i);
     tile.addEventListener("click", activate);
@@ -224,7 +223,6 @@ function buildStage(): void {
   status.innerHTML = `<div class="clock" id="clock">--:--:--</div><div class="status-line" id="status-line"></div>`;
   stage.append(status);
 
-  stage.style.setProperty("--sides", String(Math.max(1, state.channels.length - 1)));
   mountPlayers();
   applyLayout();
 }
@@ -242,8 +240,8 @@ function mountPlayers(): void {
       parent: [HOST],
       muted: true,
       autoplay: true,
-      width: String(PLAYER_W),
-      height: String(PLAYER_H),
+      width: "100%",
+      height: "100%",
     });
     players.set(channel + i, player);
 
